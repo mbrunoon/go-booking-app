@@ -51,7 +51,11 @@ func main() {
 
 		// If you use the scan without the pointer the method dont wait for the user input because its working with a copy from the variable and can´t change the original value
 
-		if userTickets <= remainingTickets {
+		isValidName := len(firstName) >= 2 && len(lastName) >= 2
+		isValidEmail := strings.Contains(email, "@")
+		isValidTicketNumber := userTickets > 0 && userTickets <= remainingTickets
+
+		if isValidName && isValidEmail && isValidTicketNumber {
 
 			remainingTickets = remainingTickets - userTickets
 			bookings = append(bookings, firstName+" "+lastName)
@@ -75,7 +79,17 @@ func main() {
 			}
 
 		} else {
-			fmt.Printf("We only have %v tickets remaining, so you can't book %v tickers\n", remainingTickets, userTickets)
+
+			if !isValidName {
+				fmt.Println("First name or last name you entered is too short")
+			}
+			if !isValidEmail {
+				fmt.Println("Your email address is invalid")
+			}
+			if !isValidTicketNumber {
+				fmt.Println("The number of ticker you entered is invalid")
+			}
+
 		}
 
 	}
