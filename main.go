@@ -3,7 +3,6 @@ package main
 import (
 	"booking-app/helper"
 	"fmt"
-	"strconv"
 )
 
 // Package Level Variables
@@ -19,7 +18,15 @@ var conferenceName = "Coffee Conference"
 
 // [EXAMPLE] var bookings [50]string // array with 50 positions and no initial value
 // [REPLACED] var bookings []string // slice: dynamic array (no lenght defined)
-var bookings = make([]map[string]string, 0) // empty slice of a maps
+// [REPLACED] var bookings = make([]map[string]string, 0) // empty slice of a maps
+var bookings = make([]UserData, 0)
+
+type UserData struct { // struct can be compared to "class" in other languages
+	firstName       string
+	lastName        string
+	email           string
+	userTickets 	uint
+}
 
 func main() {
 
@@ -75,7 +82,8 @@ func getFirstNames() []string {
 		// range expression allow us iterate over the elements and data structures
 
 		//[DELETED] var names = strings.Fields(booking) // splits the string with white space as separator and returns a slice with the slip elements
-		firstNames = append(firstNames, booking["firstName"])
+		// [REPLACED] firstNames = append(firstNames, booking["firstName"])
+		firstNames = append(firstNames, booking.firstName)
 	}
 
 	return firstNames
@@ -116,12 +124,19 @@ func getUserInput() (string, string, string, uint) {
 
 func bookTicket(userTickets uint, firstName string, lastName string, email string) {
 
-	var userData = make(map[string]string) // map[keyDataType]valueDataType is used to declare a map (like a dictonary or hash) and the "make" is used to declare a empty map
+	// 	[REPLACED] 
+	//var userData = make(map[string]string) // map[keyDataType]valueDataType is used to declare a map (like a dictonary or hash) and the "make" is used to declare a empty map
+	// userData["firstName"] = firstName
+	// userData["lastName"] = lastName
+	// userData["email"] = email
+	// userData["userTickets"] = strconv.FormatUint(uint64(userTickets), 10)
 
-	userData["firstName"] = firstName
-	userData["lastName"] = lastName
-	userData["email"] = email
-	userData["userTickets"] = strconv.FormatUint(uint64(userTickets), 10)
+	var userData = UserData{
+		firstName: firstName,
+		lastName: lastName,
+		email: email,
+		userTickets: userTickets
+	}
 
 	bookings = append(bookings, userData)
 	fmt.Printf("List of bookings is %v\n", bookings)
