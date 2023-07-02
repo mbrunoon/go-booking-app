@@ -3,6 +3,8 @@ package main
 import (
 	"booking-app/helper"
 	"fmt"
+	"sync"
+	"time"
 )
 
 // Package Level Variables
@@ -22,50 +24,56 @@ var conferenceName = "Coffee Conference"
 var bookings = make([]UserData, 0)
 
 type UserData struct { // struct can be compared to "class" in other languages
-	firstName       string
-	lastName        string
-	email           string
-	userTickets 	uint
+	firstName   string
+	lastName    string
+	email       string
+	userTickets uint
 }
+
+var waitGroup = sync.WaitGroup{} // waits for the goroutine to finish
 
 func main() {
 
 	greetUsers()
 
-	for remainingTickets > 0 && len(bookings) < 50 {
+	// for remainingTickets > 0 && len(bookings) < 50 {
 
-		firstName, lastName, email, userTickets := getUserInput()
+	firstName, lastName, email, userTickets := getUserInput()
 
-		isValidName, isValidEmail, isValidTicketNumber := helper.ValidateUserInput(firstName, lastName, email, userTickets, remainingTickets)
+	isValidName, isValidEmail, isValidTicketNumber := helper.ValidateUserInput(firstName, lastName, email, userTickets, remainingTickets)
 
-		if isValidName && isValidEmail && isValidTicketNumber {
+	if isValidName && isValidEmail && isValidTicketNumber {
 
-			bookTicket(userTickets, firstName, lastName, email)
+		bookTicket(userTickets, firstName, lastName, email)
 
-			firstNames := getFirstNames()
-			fmt.Printf("The firsts names of bookings are: %v\n", firstNames)
+		waitGroup.Add(1)                                       // sets the number of goroutines to wait for
+		go sendTicket(userTickets, firstName, lastName, email) // starts a new goroutine
 
-			if remainingTickets == 0 {
-				fmt.Println("Our conference is booked out. Come back next year.")
-				break
-			}
+		firstNames := getFirstNames()
+		fmt.Printf("The firsts names of bookings are: %v\n", firstNames)
 
-		} else {
+		if remainingTickets == 0 {
+			fmt.Println("Our conference is booked out. Come back next year.")
+			// break
+		}
 
-			if !isValidName {
-				fmt.Println("First name or last name you entered is too short")
-			}
-			if !isValidEmail {
-				fmt.Println("Your email address is invalid")
-			}
-			if !isValidTicketNumber {
-				fmt.Println("The number of ticker you entered is invalid")
-			}
+	} else {
 
+		if !isValidName {
+			fmt.Println("First name or last name you entered is too short")
+		}
+		if !isValidEmail {
+			fmt.Println("Your email address is invalid")
+		}
+		if !isValidTicketNumber {
+			fmt.Println("The number of ticker you entered is invalid")
 		}
 
 	}
 
+	// } // for remove to show how Go Routine works
+
+	waitGroup.Wait() // blocks until the WaitGroup counter is 0
 }
 
 func greetUsers() {
@@ -124,7 +132,7 @@ func getUserInput() (string, string, string, uint) {
 
 func bookTicket(userTickets uint, firstName string, lastName string, email string) {
 
-	// 	[REPLACED] 
+	// 	[REPLACED]
 	//var userData = make(map[string]string) // map[keyDataType]valueDataType is used to declare a map (like a dictonary or hash) and the "make" is used to declare a empty map
 	// userData["firstName"] = firstName
 	// userData["lastName"] = lastName
@@ -132,10 +140,10 @@ func bookTicket(userTickets uint, firstName string, lastName string, email strin
 	// userData["userTickets"] = strconv.FormatUint(uint64(userTickets), 10)
 
 	var userData = UserData{
-		firstName: firstName,
-		lastName: lastName,
-		email: email,
-		userTickets: userTickets
+		firstName:   firstName,
+		lastName:    lastName,
+		email:       email,
+		userTickets: userTickets,
 	}
 
 	bookings = append(bookings, userData)
@@ -145,4 +153,13 @@ func bookTicket(userTickets uint, firstName string, lastName string, email strin
 
 	remainingTickets = remainingTickets - userTickets
 	fmt.Printf("%v tickets remaining for %v\n", remainingTickets, conferenceName)
+}
+
+func sendTicket(userTickets uint, firstName string, lastName string, email string) {
+	time.Sleep(20 * time.Second)
+	var ticket = fmt.Sprintf("%v tickets for %v %v", userTickets, firstName, lastName)
+	fmt.Println("-------")
+	fmt.Printf("Sending ticket:\n %v to email address %v\n", ticket, email)
+	fmt.Println("-------")
+	waitGroup.Done() // Decrements the Waitgroup (goroutine) counter by 1
 }
