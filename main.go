@@ -3,7 +3,7 @@ package main
 import (
 	"booking-app/helper"
 	"fmt"
-	"strings"
+	"strconv"
 )
 
 // Package Level Variables
@@ -15,10 +15,11 @@ const conferenceTickets = 50
 var remainingTickets uint = 50
 var conferenceName = "Coffee Conference"
 
-// conferenceName := "Coffee Conference" // a shorthand for variable declaration with a datapyte but its not allowed in the Package Level Variables
+// [EXAMPLE] conferenceName := "Coffee Conference" // a shorthand for variable declaration with a datapyte but its not allowed in the Package Level Variables
 
-// var bookings [50]string // array with 50 positions and no initial value
-var bookings []string // slice: dynamic array (no lenght defined)
+// [EXAMPLE] var bookings [50]string // array with 50 positions and no initial value
+// [REPLACED] var bookings []string // slice: dynamic array (no lenght defined)
+var bookings = make([]map[string]string, 0) // empty slice of a maps
 
 func main() {
 
@@ -70,10 +71,12 @@ func greetUsers() {
 func getFirstNames() []string {
 	firstNames := []string{}
 	for _, booking := range bookings { // user _ to especify unused variables or those ones you don't want to use
-		var names = strings.Fields(booking) // splits the string with white space as separator and returns a slice with the slip elements
-		firstNames = append(firstNames, names[0])
+
+		// range expression allow us iterate over the elements and data structures
+
+		//[DELETED] var names = strings.Fields(booking) // splits the string with white space as separator and returns a slice with the slip elements
+		firstNames = append(firstNames, booking["firstName"])
 	}
-	// range expression allow us iterate over the elements and data structures
 
 	return firstNames
 }
@@ -112,10 +115,19 @@ func getUserInput() (string, string, string, uint) {
 }
 
 func bookTicket(userTickets uint, firstName string, lastName string, email string) {
-	remainingTickets = remainingTickets - userTickets
-	bookings = append(bookings, firstName+" "+lastName)
+
+	var userData = make(map[string]string) // map[keyDataType]valueDataType is used to declare a map (like a dictonary or hash) and the "make" is used to declare a empty map
+
+	userData["firstName"] = firstName
+	userData["lastName"] = lastName
+	userData["email"] = email
+	userData["userTickets"] = strconv.FormatUint(uint64(userTickets), 10)
+
+	bookings = append(bookings, userData)
+	fmt.Printf("List of bookings is %v\n", bookings)
 
 	fmt.Printf("Thank you %v %v for booking %v tickets. You will receive a confirmation email at %v\n", firstName, lastName, userTickets, email)
 
+	remainingTickets = remainingTickets - userTickets
 	fmt.Printf("%v tickets remaining for %v\n", remainingTickets, conferenceName)
 }
